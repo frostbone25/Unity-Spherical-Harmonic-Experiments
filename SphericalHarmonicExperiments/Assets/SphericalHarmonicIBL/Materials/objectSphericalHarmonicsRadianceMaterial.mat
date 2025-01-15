@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: objectSphericalHarmonicsRadianceMaterial
+  m_Shader: {fileID: 4800000, guid: 47a3a9944e20959458ea9505a2bd2a37, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _GAMMA_TO_LINEAR
+  m_InvalidKeywords:
+  - 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _GammaToLinear: 1
+    m_Colors:
+    - _RadianceCoefficents0: {r: 1.5268867, g: 1.6510763, b: 1.5560519, a: 0}
+    - _RadianceCoefficents1: {r: 0.25335664, g: 0.46587718, b: 0.9396233, a: 0}
+    - _RadianceCoefficents10: {r: 0.13135022, g: 0.14776732, b: 0.118359655, a: 0}
+    - _RadianceCoefficents11: {r: 0.17620091, g: 0.24936217, b: 0.3344743, a: 0}
+    - _RadianceCoefficents12: {r: -0.035646506, g: -0.02497743, b: -0.014103183, a: 0}
+    - _RadianceCoefficents13: {r: 0.2012425, g: 0.1867989, b: 0.1391133, a: 0}
+    - _RadianceCoefficents14: {r: 0.112526335, g: 0.105785616, b: 0.084647834, a: 0}
+    - _RadianceCoefficents15: {r: 0.06084384, g: 0.06129779, b: 0.056954686, a: 0}
+    - _RadianceCoefficents16: {r: 0.07144263, g: 0.05466779, b: 0.025054097, a: 0}
+    - _RadianceCoefficents17: {r: -0.08145211, g: -0.07849172, b: -0.05392638, a: 0}
+    - _RadianceCoefficents18: {r: -0.14501454, g: -0.12714262, b: -0.05520994, a: 0}
+    - _RadianceCoefficents19: {r: 0.0786334, g: 0.07345802, b: 0.056280375, a: 0}
+    - _RadianceCoefficents2: {r: 0.35427156, g: 0.3045757, b: 0.18172054, a: 0}
+    - _RadianceCoefficents20: {r: 0.16959393, g: 0.087132506, b: -0.030296952, a: 0}
+    - _RadianceCoefficents21: {r: 0.104688995, g: 0.09119459, b: 0.05874733, a: 0}
+    - _RadianceCoefficents22: {r: -0.008582792, g: -0.0040252684, b: 0.0037714103, a: 0}
+    - _RadianceCoefficents23: {r: 0.029955568, g: 0.032674257, b: 0.027140068, a: 0}
+    - _RadianceCoefficents24: {r: -0.15057193, g: -0.13536343, b: -0.08334482, a: 0}
+    - _RadianceCoefficents25: {r: -0.058935158, g: -0.08460726, b: -0.11261013, a: 0}
+    - _RadianceCoefficents26: {r: 0.015942695, g: 0.00864269, b: 0.009512662, a: 0}
+    - _RadianceCoefficents27: {r: -0.08325186, g: -0.10184906, b: -0.11815946, a: 0}
+    - _RadianceCoefficents28: {r: 0.059163187, g: 0.051575348, b: 0.040493395, a: 0}
+    - _RadianceCoefficents29: {r: -0.047850214, g: -0.06624209, b: -0.08343588, a: 0}
+    - _RadianceCoefficents3: {r: 0.302693, g: 0.2719853, b: 0.18923438, a: 0}
+    - _RadianceCoefficents30: {r: -0.10883123, g: -0.09827311, b: -0.073574275, a: 0}
+    - _RadianceCoefficents31: {r: -0.022777861, g: -0.012250011, b: 0.00027700892, a: 0}
+    - _RadianceCoefficents32: {r: 0.04065188, g: 0.041676704, b: 0.032111935, a: 0}
+    - _RadianceCoefficents33: {r: -0.079070576, g: -0.06729204, b: -0.05279643, a: 0}
+    - _RadianceCoefficents34: {r: 0.04617098, g: 0.0490848, b: 0.04727616, a: 0}
+    - _RadianceCoefficents35: {r: -0.0088497475, g: -0.008432469, b: -0.016673254, a: 0}
+    - _RadianceCoefficents36: {r: -0.019942395, g: -0.023851179, b: -0.018157128, a: 0}
+    - _RadianceCoefficents37: {r: 0.03881736, g: 0.028865874, b: 0.0063922675, a: 0}
+    - _RadianceCoefficents38: {r: -0.043729648, g: -0.04875582, b: -0.03672369, a: 0}
+    - _RadianceCoefficents39: {r: 0.07498823, g: 0.06047953, b: 0.025700986, a: 0}
+    - _RadianceCoefficents4: {r: 0.12270943, g: 0.10330195, b: 0.07054146, a: 0}
+    - _RadianceCoefficents40: {r: -0.028144436, g: -0.027698359, b: -0.018740978, a: 0}
+    - _RadianceCoefficents41: {r: -0.015077849, g: -0.018469637, b: -0.02169312, a: 0}
+    - _RadianceCoefficents42: {r: -0.08216502, g: -0.09824083, b: -0.102120385, a: 0}
+    - _RadianceCoefficents43: {r: -0.000278327, g: 0.0022730534, b: 0.0059177685, a: 0}
+    - _RadianceCoefficents44: {r: 0.051154926, g: 0.030170301, b: 0.0026084732, a: 0}
+    - _RadianceCoefficents45: {r: -0.049466733, g: -0.053797822, b: -0.037830826, a: 0}
+    - _RadianceCoefficents46: {r: 0.04621513, g: 0.017579084, b: -0.018760279, a: 0}
+    - _RadianceCoefficents47: {r: -0.034886334, g: -0.03510819, b: -0.016908567, a: 0}
+    - _RadianceCoefficents48: {r: 0.010745232, g: -0.009852711, b: -0.03722832, a: 0}
+    - _RadianceCoefficents5: {r: 0.1595198, g: 0.1388755, b: 0.10733268, a: 0}
+    - _RadianceCoefficents6: {r: 0.30167627, g: 0.24938656, b: 0.16445588, a: 0}
+    - _RadianceCoefficents7: {r: 0.40511364, g: 0.3621012, b: 0.2604909, a: 0}
+    - _RadianceCoefficents8: {r: 0.35401425, g: 0.28588492, b: 0.18652461, a: 0}
+    - _RadianceCoefficents9: {r: 0.16110483, g: 0.2482656, b: 0.36685044, a: 0}
+  m_BuildTextureStacks: []

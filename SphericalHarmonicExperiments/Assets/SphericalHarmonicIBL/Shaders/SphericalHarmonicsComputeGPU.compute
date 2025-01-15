@@ -1,0 +1,137 @@
+﻿//|||||||||||||||||||||||||||||||||||||| DEFINES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| DEFINES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| DEFINES ||||||||||||||||||||||||||||||||||||||
+
+#define THREAD_GROUP_SIZE_X 8
+#define THREAD_GROUP_SIZE_Y 8
+#define THREAD_GROUP_SIZE_Z 8
+
+//From UnityCG.cginc
+#define UNITY_PI            3.14159265359f
+#define UNITY_TWO_PI        6.28318530718f
+
+//|||||||||||||||||||||||||||||||||||||| KEYWORDS ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| KEYWORDS ||||||||||||||||||||||||||||||||||||||
+
+#pragma multi_compile_local _ _INPUTTYPE_CUBEMAP
+#pragma multi_compile_local _ _INPUTTYPE_EQUIRECTANGULAR
+
+#pragma multi_compile_local _ _DERINGFILTER_HANNING
+#pragma multi_compile_local _ _DERINGFILTER_LANCZOS
+#pragma multi_compile_local _ _DERINGFILTER_GAUSSIAN
+
+//|||||||||||||||||||||||||||||||||||||| INCLUDES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| INCLUDES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| INCLUDES ||||||||||||||||||||||||||||||||||||||
+
+#include "SphericalHarmonicsGPU.cginc"
+
+//|||||||||||||||||||||||||||||||||||||| VARIABLES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| VARIABLES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| VARIABLES ||||||||||||||||||||||||||||||||||||||
+
+float2 SourceCubemapResolution;
+
+Texture2D<float4> InputEquirectangular;
+TextureCube<float4> InputCubemap;
+
+SamplerState _PointClamp;
+SamplerState _LinearClamp;
+
+int SphericalHarmonicOrderCount;
+int SampleCount;
+float DeringFilterWindowSize;
+
+RWStructuredBuffer<float3> OutputCoefficients;
+
+//||||||||||||||||||||||||||||| ComputeShader_ProjectIntoUniformSH |||||||||||||||||||||||||||||
+//||||||||||||||||||||||||||||| ComputeShader_ProjectIntoUniformSH |||||||||||||||||||||||||||||
+//||||||||||||||||||||||||||||| ComputeShader_ProjectIntoUniformSH |||||||||||||||||||||||||||||
+
+#pragma kernel ComputeShader_ProjectIntoUniformSH
+[numthreads(THREAD_GROUP_SIZE_X, THREAD_GROUP_SIZE_Y, 1)]
+//[numthreads(1, 1, 1)]
+void ComputeShader_ProjectIntoUniformSH(uint2 id : SV_DispatchThreadID)
+{
+	float2 uvPosition = id.xy;
+    float2 uvNormalizedPosition = (id.xy + float2(0.5, 0.5)) / SourceCubemapResolution.xy;
+
+    //||||||||||||||||||||||||||||| CALCULATING COEFFICENTS |||||||||||||||||||||||||||||
+    //||||||||||||||||||||||||||||| CALCULATING COEFFICENTS |||||||||||||||||||||||||||||
+    //||||||||||||||||||||||||||||| CALCULATING COEFFICENTS |||||||||||||||||||||||||||||
+
+    int sphericalHarmonicCoefficientsCount = (SphericalHarmonicOrderCount + 1) * (SphericalHarmonicOrderCount + 1);
+
+    //iterate through each specified order of SH
+    for (int l = 0; l <= SphericalHarmonicOrderCount; l++)
+    {
+        //iterate through each SH basis for the current SH order
+        for (int m = -l; m <= l; m++)
+        {
+            int sphericalHarmonicIndex = l * (l + 1) + m;
+
+            float3 environmentSampleDirection = SampleEquirectangular(uvNormalizedPosition);
+            //float d_omega = DifferentialSolidAngle(SourceCubemapResolution.xy, uvNormalizedPosition);
+            float d_omega = ComputeCubemapTexelSolidAngle(uvNormalizedPosition);
+            //float d_omega = ComputeCubemapTexelSolidAngle(environmentSampleDirection, 4.0f / (SourceCubemapResolution.y * SourceCubemapResolution.y));
+
+            #if defined (_INPUTTYPE_CUBEMAP)
+                float3 environmentSample = InputCubemap.SampleLevel(_PointClamp, environmentSampleDirection, 0).rgb;
+            #elif defined (_INPUTTYPE_EQUIRECTANGULAR)
+                float3 environmentSample = InputEquirectangular.SampleLevel(_LinearClamp, SampleSphericalMap(environmentSampleDirection), 0).rgb;
+            #else
+                float3 environmentSample = float3(0, 0, 0);
+            #endif
+
+            environmentSample = LinearToGammaSpace(environmentSample);
+
+            //OutputCoefficients[sphericalHarmonicIndex] += environmentSample * EvaluateBasisFunction(l, m, environmentSampleDirection);
+            OutputCoefficients[sphericalHarmonicIndex] += environmentSample * EvaluateBasisFunction(l, m, environmentSampleDirection) * d_omega;
+            //OutputCoefficients[sphericalHarmonicIndex] += environmentSample * EvaluateBasisFunction(l, m, environmentSampleDirection) * d_omega * (1.0f / SourceCubemapResolution.x);
+        }
+    }
+}
+
+//||||||||||||||||||||||||||||| ComputeShader_ProjectRadianceIntoSampledSH |||||||||||||||||||||||||||||
+//||||||||||||||||||||||||||||| ComputeShader_ProjectRadianceIntoSampledSH |||||||||||||||||||||||||||||
+//||||||||||||||||||||||||||||| ComputeShader_ProjectRadianceIntoSampledSH |||||||||||||||||||||||||||||
+
+#pragma kernel ComputeShader_ProjectRadianceIntoSampledSH
+[numthreads(1, 1, 1)]
+void ComputeShader_ProjectRadianceIntoSampledSH(uint2 id : SV_DispatchThreadID)
+{
+    //||||||||||||||||||||||||||||| CALCULATING RADIANCE COEFFICENTS |||||||||||||||||||||||||||||
+    //||||||||||||||||||||||||||||| CALCULATING RADIANCE COEFFICENTS |||||||||||||||||||||||||||||
+    //||||||||||||||||||||||||||||| CALCULATING RADIANCE COEFFICENTS |||||||||||||||||||||||||||||
+
+    int sphericalHarmonicCoefficientsCount = (SphericalHarmonicOrderCount + 1) * (SphericalHarmonicOrderCount + 1);
+
+    //iterate through each specified order of SH
+    for (int l = 0; l <= SphericalHarmonicOrderCount; l++)
+    {
+        //iterate through each SH basis for the current SH order
+        for (int m = -l; m <= l; m++)
+        {
+            int sphericalHarmonicIndex = l * (l + 1) + m;
+
+            for (int sampleIndex = 0; sampleIndex < SampleCount; ++sampleIndex)
+            {
+                float3 environmentSampleDirection = SampleEnvironmentDirection_FibonacciSphere(sampleIndex, SampleCount);
+
+                #if defined (_INPUTTYPE_CUBEMAP)
+                    float3 environmentSample = InputCubemap.SampleLevel(_PointClamp, environmentSampleDirection, 0).rgb;
+                #elif defined (_INPUTTYPE_EQUIRECTANGULAR)
+                    float3 environmentSample = InputEquirectangular.SampleLevel(_LinearClamp, SampleSphericalMap(environmentSampleDirection), 0).rgb;
+                #else
+                    float3 environmentSample = float3(0, 0, 0);
+                #endif
+
+                environmentSample = LinearToGammaSpace(environmentSample);
+
+                OutputCoefficients[sphericalHarmonicIndex] += environmentSample * EvaluateBasisFunction(l, m, environmentSampleDirection);
+            }
+
+            OutputCoefficients[sphericalHarmonicIndex] *= 4.0f * UNITY_PI / (float)SampleCount;
+        }
+    }
+}

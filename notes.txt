@@ -1,0 +1,178 @@
+NOTE: IDEA, WRITE OUT UNITY LIGHT PROBE COEFFICENTS INTO A TEXTURE2D
+
+
+
+
+
+
+TITLE: Adventures into Spherical Harmonics!
+
+This project is an exploration into spherical harmonics and their use in computer graphics. 
+
+[INSERT PHOTO]
+
+============ SPHERICAL HARMONIC DEFINTION ============
+Spherical harmonics are about taking an input signal (in a spherical context, such as a 360-degree image of an environment), and projecting it onto a set of basis functions. This projection results in sums, which are coefficients that represent the original signal in terms of these basis functions.
+
+These coefficients can be used to later reconstruct the input signal with relatively little computational effort. The quality of the reconstruction depends on the number of orders (or levels of detail) used. Higher-order terms result in more accurate reconstructions, but also increase complexity and computational cost.
+
+If that still is a little too complicated of a definition, you can think of spherical harmonics just as a fancy 360-degree cubemap that is very efficent. Efficent in regards to data storage (only a few floating point numbers per RGB channel), and also in how you sample it. However it has it's disadvantages as 
+
+============ MOTIVATION/PREFACE ============
+For a bit of a background, I've always had quite an intrest into computer graphics. Venturing into virtual reality lead me further down this route as it imposed a big requirement, that being performance is paramount for a great experience. So in order to achieve that, one has to be very crafty and aware of the many techniques that exist in realtime graphics in order to achieve high fedelity for ultimate immersion at reasonable framerates.
+
+It's important to note as well that I don't have a heavy math background, nor is it my strong suit. But with that said I've seen this concept come up in computer graphics often. So I wanted to explore it in my own way to gain a greater understanding of the concept and it's potential applications. Over the years I had quite a few questions regarding spherical harmonics that I wanted to answer...
+
+- Why does spherical harmonics work well for diffuse lighting?
+- Why when in use for diffuse lighting, the orders are only up to 1 or 2 orders?
+- Can spherical harmonics be used as a proxy for reflections?
+- Given diffuse coefficents, can you reconstruct the radiance and use that for reflections?
+- How much can you compress the coefficents to save on space?
+- What is the performance like? Can these be computed in realtime?
+
+============ SPHERICAL HARMONIC DIFFUSE LIGHTING ============
+
+So the first obvious question is why is spherical harmonics used for diffuse lighting? Well to answer that it's important to recall that diffuse lighting is what happens when light hits a surface and scatters. Effectively the result you get is a blurrier version of the incoming light, multiplied by the material color of the surface it hit whatever it may be.
+
+Spherical harmonics have a limitation of quality, and the quality depends on the amount of orders used. The more orders you, the more coefficents that are needed and in addition the greater the complexity/processing in order to reconstruct the original signal.
+
+Now, because spherical harmonics at a low order are blurry, but also that diffuse lighting as well is also blurry. This makes them a good application for diffuse lighting.
+
+============ SPHERICAL HARMONIC DERINGING ============
+
+One big problem that developers have to deal with when using spherical harmonics is combatting ringing. In high contrast environments, spherical harmonics doesn't work too well and often upon reconstruction of the diffuse lighting from a high contrast spherical harmonic environment creates these ringing artifacts.
+
+I'm not to familiar with the math, but I do know that during SH projection the resulting values become negative, and these ringing artifacts are a result of these negative values skewing the final results. So... what can we do about it? Fortunately there are a few solutions that do exist, but each one have their advantages/drawbacks.
+
+Hanning/Lanzcos/Gaussian Filters
+
+These are windowing functions 
+
+
+============ SPHERICAL HARMONIC SPECULAR PREFACE ============
+
+So the applications of spherical harmonics in the context of diffuse/irradiance makes perfect sense and work fairly well, but what about using them for specular terms? The reason for exploring this route is that when it comes to physically based shading and rendering, having a good specular term is critical to achieving correct and good looking results. In practice in the industry, often cubemaps are used to provide better quality reflections. They work very well and they can also be improved in a number of ways, but what about if we didn't use cubemaps? What happens if we instead try to use spherical harmonics to reconstruct environment reflections? 
+
+Sure the blurry/low quality nature of spherical harmonics does not lend itself well to good pin sharp reflections in theory. I can acknowledge that... but how does it actually look in practice? This is what I ultimately wanted to see.
+
+NOTE: It's important to know that this is not a new idea, there is a great paper by peter-sloan that describes a few sections regarding the specular applications of spherical harmonics. 
+
+============ SPHERICAL HARMONIC SPECULAR: DOMINANT DIRECTION ============
+
+So lets start off simple, the most common technique described is to essentially compute the dominant direction of light from the spherical harmonic environment. It's fairly trivial to compute, and for most scenarios this is enough to provide a semblence of a specular highlight with some degree of accuracy. 
+
+[INSERT PHOTO]
+
+As you can see it looks fairly decent, and in most cases this is passable. However there are some issues...
+
+1. Only the dominant direction of light from the spherical harmonic environment is being computed. So the brightest spot in the SH environment is what gets picked as the light source effectively.
+2. Dominant direction of light does not work well in environments where lighting is mostly uniform. In an overcast environment for example, you get a sharp highlight even though the environment lighting and reflections look fairly uniform.
+3. In motion the directionality will shift the dominant direction when transitioning to different spherical harmonic environments. If you have a set of light probes in an environment, when you move an object around the specular highlight you are computing will actually slide around as it tries to pick the brightest spot of the environment.
+
+POSSIBLE SOLUTION FOR LOW CONTRAST ENVIRONMENTS: You can mitigate or can compute the intensity or length of the dominant direction vector and use that to determine how "bright" or smooth the specular highlight will be. In high contrast scenarios the specular highlight will be strong, but in low contrast environments the specular highlight can be reduced/mitigated to more accurately. The approaches to this can vary however, ranging from purely artistic control to something that has some physical accuracy and basis in reality.
+
+Even with that however it's not a perfect solution because you are computing a singular specular lobe for effectively only a single light source from the spherical harmonic environment. This is where we can move on to the next section where it's possible to calculate multiple dominant directions of light from the same spherical harmonic environment.
+
+============ SPHERICAL HARMONIC SPECULAR: MULTI-DIRECTIONAL ============
+
+Peter-Sloan's paper describes a section where its possible to extract multiple lights from a spherical harmonic environment. However I haven't been able to find any implementations regarding this, and the math described in the paper is currently over my head so I haven't seen the results regarding this. With that said it's an extension of the first technique, you'd be getting more specular highlights coming from different directions depending on the environment but this can only get you so far. You'd only be highlighting a few directions in the spherical harmonic environment with a strong highlight in each direction, but nothing for everything else. What so else can we do?
+
+NOTE: It's worth bringing up also, that with the two techniques described, it can be used to add additional diffuse light shading to the final lighting. This does mean reduced accuracy, but with that said this is something that can be done if the art direction calls for it. The techniques describe after all provide you with directions, and that can be used for a number of things.
+
+============ SPHERICAL HARMONIC SPECULAR: RECONSTRUCTING RADIENCE FOR REFLECTIONS PREFACE ============
+
+What if we instead reconstructed the incoming radiance of the spherical harmonic environment and used that instead to handle environment reflections? Spherical harmonics here are already giving you a full 360 panoramic image of the environment at the given point except its in the form of a set of floats, rather than a full cubemap texture. So why don't we try to use that instead to sample reflections?
+
+Well the problem with that, as most graphics programmers would tell you, is that when using spherical harmonics you can only reconstruct the original environment with so much accruacy. Depending on the orders and the amount of coefficents stored, the resulting reconstruction would be a very blurry version of the original environment. Not great especially for materials that are supposed to be pretty reflective in a PBR context.
+
+Ok acknowledged... but what if we just tried to use it anyway? What would that actually look like in practice? This is exactly what I wanted to see.
+
+Now before we do this we need to keep in mind a few things...
+1. Are the given coefficents to the object shader pre-convolved? Most engines will probably pre-convolve the coefficents into irradiance to save on extra calculations for the GPU, and this will need to be un-done in order to retain the raw coefficents so that radiance can be reconstructed accurately. In some cases this will incurr additional calculations just to undo the convolution.
+2. Watch out for ringing! We already had to deal with diffuse lighting, however as I discovered ringing will become more apparent when reconstructing the raw radiance so filtering methods will need to be applied in order to combat this.
+
+With those hopefully in the back of our minds... lets try it!
+
+============ SPHERICAL HARMONIC SPECULAR: RECONSTRUCTING RADIENCE FOR REFLECTIONS ============
+
+Here in Unity3D the coefficents are pre-convolved into irradiance, so in order to get accurate results we need to undo the irradiance convolution. The math for this is fortunately is not to complicated, but this does mean added instructions in order to reconstruct radiance. Now instead of using the normal direction, we will use the reflection direction. Here are the raw results reconstructing radiance from an order 2 spherical harmonics and using that as the enviroment reflection.
+
+[INSERT PHOTO]
+
+It does look rough... and thats because with this raw radiance reconstruction we aren't doing any filtering to mitigate these intense hotspots in the environment so lets filter these using hanning.
+
+[INSERT PHOTO]
+
+Looking better for sure! Though as we know with the filtering, this does affect the quality of the reconstructed radiance and essentially blurs the hostpots more. It's obviously not perfect, and the final result is a pretty rough/blurry reflection of the environment. In certain circumstances however this should just work, but we can improve it a little more.
+
+Using what we learned earlier with the previous techniques in regards to sampling the dominant direction of light from the SH environment, we can use that to calculate a specular lobe. The size of this specular lobe will then be fully controlled by the material properties. While again as we noted initally this is only for a singular highlight, this will atleast provide a semblence of a pin sharp refleciton for materials that are configured as such. The rest of the specular information is then filled in by the reconstructed radiance to get it the rest of its color. 
+
+[INSERT PHOTO]
+
+NOTE: It's worth pointing out though that by adding another new specular light lobe ontop, that this will in a sense increase the intensity of the overall incoming light therefore making this less physically plausible. So this is an artistic decision here in an attempt to improve the look of the spherical harmonic environment reflections.
+
+
+============ COEFFICENT COMPRESSION: Preface ============
+So we have our coefficents generated, awesome! Now lets entertain an actual real world scenario that developers across the earth will have to deal with at some point. Lets assume we have a light probe system that will be used by objects in the scene, to provide diffuse lighting. These light probes only provide irradiance data, and its computed up to 2 orders (which is fairly standard).
+
+Sounds exactly like the existing light probe system in Unity3D! 
+
+Now lets assume that you are lighting a fairly large level that has many differnet areas with unique lighting conditions. Cool... but this actually has quite a few technical problems associated with that one will have to face.
+
+1. In order to get good lighting coverage across the level we will need an abundance of probes.
+2. Having an abundance of probes means having a LOT of data, so you will need eyes on memory/disk space.
+3. In addition to having alot of probes also will potentially create performance problems in order to manage this data.
+
+So... what can we do about it? 
+
+Well fortunately there are actually quite a LOT of solutions that can be deployed here in order to reduce the amount of probes needed, but all of them have their own drawbacks/advantages. In addition some will require you to make assumptions regarding your game/level design.
+
+[INSERT PHOTO]
+[Solution 1]: Reduce the amount of probes needed across the level. Good, we can do that, but reducing coverage means reducing the accuracy of lighting.
+
+[INSERT PHOTO]
+[Solution 1.1]: Use your game design requirements to make informed decisions about where probes are not needed. Say we are making a first person shooter game, and generally most of the activity in the level will never really leave the ground. So we can use that assumption to save us some data by making sure we don't have probes that are placed say several meters above the playable space. We won't ever have objects that high so we can avoid placing probes there.
+
+[INSERT PHOTO]
+[Solution 2]: Reduce the amount of probes AFTER generating by looking at the final lighting, and remove probes in proximity if they have similar lighting. After all no reason to have multiple probes in the same spot if the lighting across the area is the same. Magic Light Probes asset does exactly this in Unity. 
+
+These solutions are all perfectly valid, and I'm sure there are more than I listed here... however I wanted to look deeper into the actual fundamentals. For example, another potential solution we could deploy is to reduce the size of the data. What would be the results if we compressed coefficents instead? How would that look? And what would be the advantages/drawbacks to doing that? I haven't really seen too much information regarding this avaliable out there so I decided to investigate it myself and see where it leads me.
+
+Before we get into it, we (along with you) need to keep in mind a few things. 
+- The value ranges of these SH coefficents can vary quite a bit. Depending on lighting is handled in your engine, value ranges may be fairly small, or if you are crazy, you could have ranges that match real world units, and those values can be exceedingly high depending on the units you are using. In my investigation into this matter my value ranges weren't too high. Roughly max would go to about 5.0f and minimums over above 0.0f, although sometimes would go negative in certain cases. But the thing to consider here is that compressing these coefficents does boil down to the same concept as compressing HDR color formats.
+- Since we are introducing the idea of compression, depending on how you go about shrinking the size of your data you will be trading processing cost for disk/memory usage. Make sure you profile your project and determine which
+
+============ COEFFICENT COMPRESSION: Float32 ============
+
+So with that, lets go back to where we were. We have light probes with 2 Order SH Irradiance data. That is a set of 9 float3's (RGB) coefficents. 9 float3's is 27 floats total. There are 4 bytes in a float so 4 * 27 = 108 bytes. Not bad, although in the context of light probes, this can get out of hand pretty quick. 
+
+For instance say we have a level that is 100 x 100 meters large. In addition lets say it has some verticality up to around 10 meters. So that is a level with dimensions 100 x 100 x 10. For coverage across this level lets say that we have a probe for every meter. So 100 x 100 x 10 = 100000 probes for every meter across the level. 
+
+That is alot of probes, but multiply that by the size of the data for each probe, which is 108 bytes. 108 x 100000 = 10800000 bytes. With some unit math this amounts to 10.8 MB of data. That is pretty large considering that data wise this can take up as much data as a few textures in the game. So lets mess around with compressing this data. 
+
+[INSERT PHOTO]
+
+============ COEFFICENT COMPRESSION: Half16 ============
+
+The first thing to do, is to switch to half precision. This is a fairly common to do as the precision of floats is often more than what you need, and the reduced precison isn't that noticable. A Half16 is 2 bytes, so redoing the math again. 2 * 27 = 54 bytes. 54 * 100000 = 5400000 bytes (5.4 MB). Thats a pretty big reduction! Literally half the size of the original.
+
+Checking the results visually, we can see that pretty much in all circumstances everything looks identical.
+
+[INSERT PHOTO]
+
+============ COEFFICENT COMPRESSION: Signed 10 Bit Decimal 2 ============
+
+We can try to go go further, and this is what I was most curious about. Note that this will approach the territory where you need to watch for your value ranges. My computed coefficent ranges for the HDRIs i've tested against were [-0.5f - 5.0f] roughly. So I elected to compress the values down to a signed 10 bit value. Which affords you [-512, 511] value range. In my testing I also found that atleast 2 decimal places were needed to keep results looking fairly close to the original. So with some basic compression math the actual range would be [-5.12, 5.11]. You can pack these 10 bit values into a full 32 bit (4 byte) value. (R 10 | G 10 | B 10 | 2). You could also try something similar to D3Ds R11G11B10 format often used for HDR to squeeze a little extra data for some of the channels, but I wanted to keep things consistent here. So 3 floats effectively compressed into 4 bytes. 9 * 4 = 36 bytes. 36 * 100000 = 3600000 bytes (3.6 MB). That is about as low as we can get it in theory while trying to respect HDR values. 
+
+[INSERT PHOTO]
+
+I should note that this is obviously the most basic and simple way to compress this kind of value in this case. However I mentioned earlier that this boils down to effectively compressing HDR color data. So if you wanted to get fancy you could employ concepts behind HDR compression i.e. like using RGBM, RGBE, or even LogLUV to get better results. But you need to keep in mind that with these compression methods, you are trading memory with processing power to compress/decompress these values whenever you are to use them. But with that, and using the math here and basic value compression the best case you can get here while respecting HDR values is 3.6 MB for about a 100,000 probes in a scene. That doesn't even factor the solutions one could apply ontop to reduce the probes that are in the scene for greater efficency!
+
+Now to finish off this section, just to entertain the idea say that you managed to settle on a solution that compresses the SH coefficents into 3 bytes for a float3. 3 * 9 = 27 bytes. 27 * 100000 = 2700000 bytes (2.7 MB). You could go even further, and that would be basically going down the route of texture compression, so i.e. applying block compression to values that are the same to compress the data down even further. 
+
+
+
+
+
+
+
