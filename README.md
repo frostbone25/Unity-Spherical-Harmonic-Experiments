@@ -2,7 +2,7 @@
 
 This is a personal project where I explore and experiment with Spherical Harmonics.
 
-Most importantly I will be writing and sharing my results/experiments as time goes on, which are all from the perspective of a guy who is not math oriented nor that technically minded. Answering common questions about spherical harmonics, but also answering some of my own as well.
+As time goes on I will be writing and sharing my results/experiments with spherical harmonics, mostly to answer personal questions I have.
 - [Spherical Harmonic Coefficent Precison Reduction](https://github.com/frostbone25/Unity-Spherical-Harmonic-Experiments/blob/main/CoefficentPrecison.md)
 
 ![preview-screenshot](GithubContent/preview-screenshot.png)
