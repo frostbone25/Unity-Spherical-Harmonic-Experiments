@@ -43,14 +43,14 @@ Material:
     - _PackedIrradianceCoefficents_8R_8G: 0
     - _ShowIrradianceDominantDirection: 0
     m_Colors:
-    - _IrradianceCoefficents0: {r: 2.747239, g: 2.6551354, b: 2.0250394, a: 0}
-    - _IrradianceCoefficents1: {r: 0.70613176, g: 0.8390565, b: 0.99378735, a: 0}
-    - _IrradianceCoefficents2: {r: 3.1877005, g: 2.8621519, b: 1.6874768, a: 0}
-    - _IrradianceCoefficents3: {r: 2.3380523, g: 2.1046703, b: 1.2511742, a: 0}
-    - _IrradianceCoefficents4: {r: 0.7889641, g: 0.74496025, b: 0.47942293, a: 0}
-    - _IrradianceCoefficents5: {r: 1.0962056, g: 1.0352161, b: 0.66843045, a: 0}
-    - _IrradianceCoefficents6: {r: 2.383816, g: 2.1309795, b: 1.26208, a: 0}
-    - _IrradianceCoefficents7: {r: 4.0243034, g: 3.6010287, b: 2.1451695, a: 0}
-    - _IrradianceCoefficents8: {r: 1.5180295, g: 1.3557557, b: 0.79648626, a: 0}
+    - _IrradianceCoefficents0: {r: 2.625, g: 2.493, b: 1.782, a: 0}
+    - _IrradianceCoefficents1: {r: 1.022, g: 1.056, b: 0.865, a: 0}
+    - _IrradianceCoefficents2: {r: 3.205, g: 3.017, b: 2.043, a: 0}
+    - _IrradianceCoefficents3: {r: 2.275, g: 2.138, b: 1.449, a: 0}
+    - _IrradianceCoefficents4: {r: 1.199, g: 1.134, b: 0.784, a: 0}
+    - _IrradianceCoefficents5: {r: 1.698, g: 1.587, b: 1.068, a: 0}
+    - _IrradianceCoefficents6: {r: 2.336, g: 2.156, b: 1.422, a: 0}
+    - _IrradianceCoefficents7: {r: 4.176, g: 3.89, b: 2.629, a: 0}
+    - _IrradianceCoefficents8: {r: 1.155, g: 1.034, b: 0.6, a: 0}
     - _IrradianceDominantLightColorOverride: {r: 1, g: 0.98225087, b: 0.730461, a: 1}
   m_BuildTextureStacks: []

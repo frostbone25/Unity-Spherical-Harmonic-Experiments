@@ -50,7 +50,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _InputCubemap:
-        m_Texture: {fileID: 8900000, guid: 1d3136f28617c3946b4dfd50e2d409cc, type: 3}
+        m_Texture: {fileID: 8900000, guid: 4c32f62e07a43534da2a882920878f3a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -86,8 +86,8 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ReflectionIntensity: 0.25
-    - _SampleCount: 1
-    - _Smoothness: 0.595
+    - _SampleCount: 64
+    - _Smoothness: 0.73
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
